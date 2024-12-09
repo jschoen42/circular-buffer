@@ -1,8 +1,13 @@
 # https://www.kernel.org/doc/Documentation/circular-buffers.txt
 # https://en.wikipedia.org/wiki/Circular_buffer
 
+# https://www.youtube.com/watch?v=ebZB8dPrrog?t=210s
+
 class CircularBufferFull(Exception):  # noqa: N818
-    pass
+
+    def __init__(self, size: int):
+        super().__init__(f"Buffer limit {size} reached")
+        self.size = size
 
 class CircularBufferEmpty(Exception):  # noqa: N818
     pass
@@ -52,7 +57,7 @@ class CircularBuffer:
     def write(self, value: any) -> None:
         ptr = (self.head + 1) % self.size
         if ptr == self.tail:
-            raise CircularBufferFull
+            raise CircularBufferFull( self.size-1 )
 
         self.data[self.head] = value
         self.head = ptr

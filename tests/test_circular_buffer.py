@@ -74,4 +74,4 @@ def test_CircularBuffer_raise_CircularBufferFull() -> None:
       buf.write(3)
       buf.write(4)
 
-   assert str(excinfo.value) == ""
+   assert str(excinfo.value) == "Buffer limit 3 reached"

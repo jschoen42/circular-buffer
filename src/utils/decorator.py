@@ -12,7 +12,9 @@
 import contextlib
 import time
 import re
-from typing import Generator, Callable
+
+from typing import Generator
+from collections.abc import Callable
 
 from src.utils.trace import Trace, Color
 
