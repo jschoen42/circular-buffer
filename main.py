@@ -24,15 +24,15 @@ def test01():
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3],
         }
         buf.write(value)
-        Trace.info(f"write '{value["value"]}' to {buf}")
+        Trace.info(f"write: {buf} '{value["value"]}'")
 
-    for i in range(15):
+    for i in range(10):
         if buf.empty():
             Trace.error(f"no entries [{buf}]")
             break
 
         result = buf.read()
-        Trace.info(f"read '{result}'")
+        Trace.info(f"read:  {buf} -> '{result["value"]}'")
 
 def main():
     test01()
