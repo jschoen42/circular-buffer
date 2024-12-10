@@ -1,5 +1,5 @@
 """
-    (c) Jürgen Schoenemeyer, 08.12.2024
+    (c) Jürgen Schoenemeyer, 10.12.2024
 
     @duration(pre_text: str = "", rounds: int = 1)
 
@@ -12,7 +12,6 @@
 import contextlib
 import time
 import re
-
 from typing import Generator
 from collections.abc import Callable
 
