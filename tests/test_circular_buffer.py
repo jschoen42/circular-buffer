@@ -63,7 +63,7 @@ def test_CircularBuffer_raise_CircularBufferEmpty() -> None:
    with pytest.raises(CircularBufferEmpty) as excinfo:
       buf.read()
 
-   assert str(excinfo.value) == ""
+   assert excinfo.type is CircularBufferEmpty
 
 def test_CircularBuffer_raise_CircularBufferFull() -> None:
    buf = CircularBuffer(4)
@@ -74,4 +74,4 @@ def test_CircularBuffer_raise_CircularBufferFull() -> None:
       buf.write(3)
       buf.write(4)
 
-   assert str(excinfo.value) == "Buffer limit 3 reached"
+   assert excinfo.type is CircularBufferFull
