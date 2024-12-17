@@ -38,6 +38,6 @@ def main():
     test01()
 
 if __name__ == "__main__":
-    Trace.set( debug_mode=True, show_timestamp=True )
+    Trace.set( debug_mode=True, timezone=False )
     Trace.action(f"Python version {sys.version}")
     main()

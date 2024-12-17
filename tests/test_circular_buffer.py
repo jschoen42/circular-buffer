@@ -1,13 +1,25 @@
 import pytest
 
 from src.circular_buffer import CircularBuffer
-from src.circular_buffer import CircularBufferFull, CircularBufferEmpty
+from src.circular_buffer import CircularBufferMinimalSize, CircularBufferFull, CircularBufferEmpty
 
-def test_CircularBuffer_get_length() -> None:
-   size: int = 10
+@pytest.mark.parametrize("size", [0, -10])
+def test_CircularBuffer_minimal_size(size: int):
+   with pytest.raises(CircularBufferMinimalSize) as excinfo:
+      _ = CircularBuffer(size)
+   assert excinfo.type is CircularBufferMinimalSize
 
+@pytest.mark.parametrize("size", [10])
+def test_CircularBuffer_normal_size(size: int):
+    try:
+        _ = CircularBuffer(size)
+    except CircularBufferMinimalSize:
+        pytest.fail("Unexpected MyError ..")
+
+@pytest.mark.parametrize("size", [10])
+def test_CircularBuffer_get_length(size: int) -> None:
    buf = CircularBuffer(size)
-   assert len(buf) == 10
+   assert len(buf) == size
 
 def test_CircularBuffer_status_empty() -> None:
    buf = CircularBuffer(4)
@@ -30,8 +42,9 @@ def test_CircularBuffer_status_empty_full() -> None:
    assert buf.full()  is True
    assert buf.empty() is False
 
-def test_CircularBuffer_get_free() -> None:
-   size: int = 10
+@pytest.mark.parametrize("size", [10])
+def test_CircularBuffer_get_free(size: int) -> None:
+   size: int = size
 
    buf = CircularBuffer(size)
    assert buf.free() == size-1
@@ -39,7 +52,7 @@ def test_CircularBuffer_get_free() -> None:
    buf.write( 1 )
    buf.write( 2 )
 
-   assert buf.free() == size-1-2
+   assert buf.free() == size-3
 
 def test_CircularBuffer_entries() -> None:
    buf = CircularBuffer(10)
@@ -56,6 +69,24 @@ def test_CircularBuffer_entries() -> None:
    assert buf.read() == 4
    assert buf.read() == 5
 
+@pytest.mark.parametrize("size", [1, 10])
+def test_CircularBuffer_dynamic(size: int) -> None:
+   buf = CircularBuffer(size)
+
+   for i in range(size-1):
+      buf.write(i)
+
+   with pytest.raises(CircularBufferFull) as excinfo:
+      buf.write(size)
+   assert excinfo.type is CircularBufferFull
+
+   for i in range(size-1):
+      assert buf.read() == i
+
+   with pytest.raises(CircularBufferEmpty) as excinfo:
+      buf.read()
+   assert excinfo.type is CircularBufferEmpty
+
 
 def test_CircularBuffer_raise_CircularBufferEmpty() -> None:
    buf = CircularBuffer(10)
@@ -65,13 +96,12 @@ def test_CircularBuffer_raise_CircularBufferEmpty() -> None:
 
    assert excinfo.type is CircularBufferEmpty
 
-def test_CircularBuffer_raise_CircularBufferFull() -> None:
-   buf = CircularBuffer(4)
+@pytest.mark.parametrize("size", [1, 10])
+def test_CircularBuffer_raise_CircularBufferFull(size: int) -> None:
+   buf = CircularBuffer(size)
 
    with pytest.raises(CircularBufferFull) as excinfo:
-      buf.write(1)
-      buf.write(2)
-      buf.write(3)
-      buf.write(4)
+      for i in range(size):
+         buf.write(i)
 
    assert excinfo.type is CircularBufferFull

@@ -3,14 +3,18 @@
 
 # https://www.youtube.com/watch?v=ebZB8dPrrog?t=210s
 
-class CircularBufferFull(Exception):  # noqa: N818
-
-    def __init__(self, size: int):
-        super().__init__(f"Buffer limit {size} reached")
-        self.size = size
+class CircularBufferMinimalSize(Exception):  # noqa: N818
+    def __init__(self):
+        super().__init__("Circular Buffer minimal size is 1")
 
 class CircularBufferEmpty(Exception):  # noqa: N818
-    pass
+    def __init__(self):
+        super().__init__("Circular Buffer ist empty")
+
+class CircularBufferFull(Exception):  # noqa: N818
+    def __init__(self, size: int):
+        super().__init__(f"Circular Buffer limit {size} reached")
+        self.size = size
 
 # head: write - the point at which the producer inserts items into the buffer
 # tail: read  - the point at which the consumer finds the next item in the buffer
@@ -19,8 +23,11 @@ class CircularBuffer:
     def __init__(self, size: int=100):
         self.size = size
         self.data = [None] * size
-        self.tail  = 0
+        self.tail = 0
         self.head = 0
+
+        if size < 1:
+            raise CircularBufferMinimalSize()
 
     def __len__(self):
         return self.size
