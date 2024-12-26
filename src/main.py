@@ -1,5 +1,5 @@
-# .venv\Scripts\activate
-# python main.py
+# .venv/Scripts/activate
+# python src/main.py
 #
 # pytest -v
 
@@ -7,8 +7,8 @@ import sys
 import math
 from datetime import datetime
 
-from src.utils.trace import Trace
-from src.circular_buffer import CircularBuffer
+from utils.trace import Trace
+from circular_buffer import CircularBuffer
 
 def test01():
     buf = CircularBuffer(8)
