@@ -159,7 +159,9 @@ git push -u origin main
 
 git log --oneline origin/main
 git log --graph --oneline --decorate
-git log --graph --pretty=format:'%C(auto)%h%d (%ci) %s
+
+git log --name-only --pretty=format:"%h (%ch)"
+git log --name-status --pretty=format:"%h (%ai)" > __history.txt
 
 git fetch origin
 git log origin/main
@@ -189,7 +191,30 @@ git branche -d feature/...
 ....
 git push origin main feature/...
 
+--- reflog
+git reflog --date=iso > __reflog.txt
+
+
+--- stash
+
+git stash
+git stash -u
+oder
+git stash push
+git stash push -m "my_stash_name"
+
+git stash list
+git stash show
+git stash show -p     # recent stash
+git stash show -p 0   # only the last stash
+
+git stash pop
+git stash pop 'stash@{n}'
+
+git stash apply 0
+
 ### install "git extras"
+
 --- git clone https://github.com/tj/git-extras.git
 --- open pwshell as admin in git-extras
 --- ./install.cmd "C:\Program Files\_prog\Git"
@@ -202,4 +227,3 @@ git effort
 
 Remove the latest 3 commits
 git undo 3
-

@@ -4,6 +4,9 @@ result/*
 data/*
 !data/.gitkeep
 
+*.7z
+__history.txt
+
 ### Python
 
 __pycache__/
