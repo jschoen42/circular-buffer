@@ -2,6 +2,10 @@
 name = "circulat-buffer"
 version = "0.1.0"
 description = "Add your description here"
+authors = [
+  { name="Jürgen Schoenemeyer", email="js007@web.de" },
+]
+license = {file = "LICENSE"}
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = []
@@ -9,4 +13,11 @@ dependencies = []
 [dependency-groups]
 dev = [
     "pytest>=8.3.4",
+    "mypy>=1.14.1",
 ]
+
+[tool.mypy]
+python_version = "3.13"
+mypy_path = "src"
+explicit_package_bases = true
+namespace_packages = true

@@ -10,7 +10,7 @@ from datetime import datetime
 from utils.trace import Trace
 from circular_buffer import CircularBuffer
 
-def test01():
+def test01() -> None:
     buf = CircularBuffer(8)
 
     for i in range(15):
@@ -34,7 +34,7 @@ def test01():
         result = buf.read()
         Trace.info(f"read:  {buf} -> '{result["value"]}'")
 
-def main():
+def main() -> None:
     test01()
 
 if __name__ == "__main__":

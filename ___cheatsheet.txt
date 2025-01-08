@@ -82,9 +82,9 @@ uv run
 uv lock
 
 uv pip list
-uv pip list --outdated
+uv pip list --outdated > __outdated.txt
 
-uv pip tree
+uv pip tree > __tree.txt
 
 ------------------ upgrade Python -------------------
 
@@ -157,11 +157,14 @@ git add .
 git commit -m "..."
 git push -u origin main
 
+unstage files:
+git reset
+
 git log --oneline origin/main
 git log --graph --oneline --decorate
 
 git log --name-only --pretty=format:"%h (%ch)"
-git log --name-status --pretty=format:"%h (%ai)" > __history.txt
+git log --name-status --pretty=format:"%h [%ai] %D >> '%s'" > __history.txt
 
 git fetch origin
 git log origin/main
@@ -169,13 +172,13 @@ git diff --name-only origin/main
 git diff origin/main -- _prefs/base.yaml
 git diff origin/main
 
-git rebase -i --HEAD-5
+git rebase -i HEAD~3
 git rebase -i --root
 
 local branch -> https://www.youtube.com/watch?v=qY6IooRlNGI
 ------------
 git branch
-git branch  feature/...
+git branch feature/...
 git checkout feature/...
 git checkout -  <- toggle main/feature
 
@@ -186,14 +189,14 @@ git status
 
 git push -u origin main
 
-git branche -d feature/...
+git branche -d feature/... (delete)
 
 ....
 git push origin main feature/...
 
 --- reflog
-git reflog --date=iso > __reflog.txt
 
+git reflog --date=iso > __reflog.txt
 
 --- stash
 
@@ -227,3 +230,34 @@ git effort
 
 Remove the latest 3 commits
 git undo 3
+
+###################### mypy ########################
+
+https://github.com/python/typeshed/tree/main/stubs
+
+[dependency-groups]
+dev = [
+    "mypy>=1.14.1",
+    "lxml-stubs>=0.5.1",
+    "pandas-stubs>=2.2.3.241126",
+    "types-openpyxl>=3.1.5.20241225",
+    "types-pyyaml>=6.0.12.20241230",
+    "types-xmltodict>=0.14.0.20241009",
+    "types-python-dateutil>=2.9.0.20241206",
+]
+
+[tool.mypy]
+python_version = "3.12"
+mypy_path = "src"
+explicit_package_bases = true
+namespace_packages = true
+
+[[tool.mypy.overrides]]
+module = "faster_whisper.*"
+ignore_errors = true
+ignore_missing_imports = true
+
+python __mypy.py src/main.py
+uv run __mypy.py src/main.py
+
+# type: ignore # mypy

@@ -3,16 +3,18 @@
 
 # https://www.youtube.com/watch?v=ebZB8dPrrog?t=210s
 
+from typing import Any, Iterator
+
 class CircularBufferMinimalSize(Exception):  # noqa: N818
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Circular Buffer minimal size is 1")
 
 class CircularBufferEmpty(Exception):  # noqa: N818
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Circular Buffer ist empty")
 
 class CircularBufferFull(Exception):  # noqa: N818
-    def __init__(self, size: int):
+    def __init__(self, size: int) -> None:
         super().__init__(f"Circular Buffer limit {size} reached")
         self.size = size
 
@@ -20,7 +22,7 @@ class CircularBufferFull(Exception):  # noqa: N818
 # tail: read  - the point at which the consumer finds the next item in the buffer
 
 class CircularBuffer:
-    def __init__(self, size: int=100):
+    def __init__(self, size: int=100) -> None:
         self.size = size
         self.data = [None] * size
         self.tail = 0
@@ -29,19 +31,19 @@ class CircularBuffer:
         if size < 1:
             raise CircularBufferMinimalSize()
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.size
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"CircularBuffer: size={self.size}, free={self.free()}, tail={self.tail}, head={self.head}"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"CircularBuffer: {self.size=}, {self.free=}, {self.tail=}, {self.head=}"
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Any]:
         return self
 
-    def __next__(self) -> any:
+    def __next__(self) -> Any:
         if self.tail == self.head:
             raise StopIteration
 
@@ -61,7 +63,7 @@ class CircularBuffer:
     def free(self) -> int:
         return((self.tail - self.head + self.size - 1) % self.size)
 
-    def write(self, value: any) -> None:
+    def write(self, value: Any) -> None:
         ptr = (self.head + 1) % self.size
         if ptr == self.tail:
             raise CircularBufferFull( self.size-1 )
@@ -69,7 +71,7 @@ class CircularBuffer:
         self.data[self.head] = value
         self.head = ptr
 
-    def read(self) -> any:
+    def read(self) -> Any:
         if self.tail == self.head:
             raise CircularBufferEmpty
 
