@@ -4,16 +4,16 @@ from src.circular_buffer import CircularBuffer
 from src.circular_buffer import CircularBufferMinimalSize, CircularBufferFull, CircularBufferEmpty
 
 @pytest.mark.parametrize("size", [0, -10])
-def test_CircularBuffer_minimal_size(size: int):
+def test_CircularBuffer_minimal_size(size: int) -> None:
    with pytest.raises(CircularBufferMinimalSize) as excinfo:
       _ = CircularBuffer(size)
    assert excinfo.type is CircularBufferMinimalSize
 
 @pytest.mark.parametrize("size", [10])
-def test_CircularBuffer_normal_size(size: int):
-    try:
+def test_CircularBuffer_normal_size(size: int) -> None:
+   try:
         _ = CircularBuffer(size)
-    except CircularBufferMinimalSize:
+   except CircularBufferMinimalSize:
         pytest.fail("Unexpected MyError ..")
 
 @pytest.mark.parametrize("size", [10])
@@ -43,8 +43,8 @@ def test_CircularBuffer_status_empty_full() -> None:
    assert buf.empty() is False
 
 @pytest.mark.parametrize("size", [10])
-def test_CircularBuffer_get_free(size: int) -> None:
-   size: int = size
+def test_CircularBuffer_get_free(in_size: int) -> None:
+   size: int = in_size
 
    buf = CircularBuffer(size)
    assert buf.free() == size-1

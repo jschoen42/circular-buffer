@@ -3,7 +3,7 @@
 
 # https://www.youtube.com/watch?v=ebZB8dPrrog?t=210s
 
-from typing import Any, Iterator
+from typing import Any, Iterator, override
 
 class CircularBufferMinimalSize(Exception):  # noqa: N818
     def __init__(self) -> None:
@@ -23,6 +23,7 @@ class CircularBufferFull(Exception):  # noqa: N818
 
 class CircularBuffer:
     def __init__(self, size: int=100) -> None:
+        super().__init__()
         self.size = size
         self.data = [None] * size
         self.tail = 0
@@ -34,9 +35,11 @@ class CircularBuffer:
     def __len__(self) -> int:
         return self.size
 
+    @override
     def __str__(self) -> str:
         return f"CircularBuffer: size={self.size}, free={self.free()}, tail={self.tail}, head={self.head}"
 
+    @override
     def __repr__(self) -> str:
         return f"CircularBuffer: {self.size=}, {self.free=}, {self.tail=}, {self.head=}"
 
@@ -73,7 +76,7 @@ class CircularBuffer:
 
     def read(self) -> Any:
         if self.tail == self.head:
-            raise CircularBufferEmpty
+            raise CircularBufferEmpty()
 
         value = self.data[self.tail]
         self.tail = (self.tail + 1) % self.size

@@ -4,3 +4,9 @@ deactivate
 
 python src/main.py
 uv run src/main.py
+
+uv run _mypy.py src/main.py
+uv run _mypy.py tests/test_circular_buffer.py
+
+python _pyright.py src
+python _pyright.py tests
