@@ -1,5 +1,5 @@
 """
-    © Jürgen Schoenemeyer, 19.01.2025
+    © Jürgen Schoenemeyer, 04.03.2025 15:28
 
     src/utils/trace.py
 
@@ -33,87 +33,77 @@
       - Color.<color_name>
       - Color.clear(text: str) -> str:
 """
+from __future__ import annotations
 
-import platform
-import sys
-import os
-import re
-import inspect
 import importlib.util
+import inspect
+import platform
+import re
+import sys
 
-from typing import Any, Callable, Dict, List
+from datetime import datetime
 from enum import StrEnum
 from pathlib import Path
-from datetime import datetime
-from zoneinfo import ZoneInfo
-from zoneinfo import ZoneInfoNotFoundError
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, List
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-system = platform.system()
-if system == "Windows":
-    import msvcrt
-else:
-    import tty
-    import termios as term
+if TYPE_CHECKING:
+    from types import FrameType
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
 
-def ansi_code(code: int) -> str:
-    return f"\033[{code}m"
-
 class Color(StrEnum):
-    RESET            = ansi_code(0)
-    BOLD             = ansi_code(1)
-    DISABLE          = ansi_code(2)
-    ITALIC           = ansi_code(3)
-    UNDERLINE        = ansi_code(4)
-    INVERSE          = ansi_code(7)
-    INVISIBLE        = ansi_code(8)
-    STRIKETHROUGH    = ansi_code(9)
-    NORMAL           = ansi_code(22)
+    RESET            = "\033[0m"
+    BOLD             = "\033[1m"
+    DISABLE          = "\033[2m"
+    ITALIC           = "\033[3m"
+    UNDERLINE        = "\033[4m"
+    INVERSE          = "\033[7m"
+    INVISIBLE        = "\033[8m"
+    STRIKETHROUGH    = "\033[9m"
+    NORMAL           = "\033[11m"
 
-    BLACK            = ansi_code(30)  # light/dark mode: #666666 / #666666
-    RED              = ansi_code(31)  # light/dark mode: #CD3131 / #F14C4C
-    GREEN            = ansi_code(32)  # light/dark mode: #14CE14 / #23D18B
-    YELLOW           = ansi_code(33)  # light/dark mode: #B5BA00 / #F5F543
-    BLUE             = ansi_code(34)  # light/dark mode: #0451A5 / #3B8EEA
-    MAGENTA          = ansi_code(35)  # light/dark mode: #BC05BC / #D670D6
-    CYAN             = ansi_code(36)  # light/dark mode: #0598BC / #29B8DB
-    LIGHT_GRAY       = ansi_code(37)  # light/dark mode: #A5A5A5 / #E5E5E5
+    BLACK            = "\033[30m"  # light/dark mode: #666666 / #666666
+    RED              = "\033[31m"  # light/dark mode: #CD3131 / #F14C4C
+    GREEN            = "\033[32m"  # light/dark mode: #14CE14 / #23D18B
+    YELLOW           = "\033[33m"  # light/dark mode: #B5BA00 / #F5F543
+    BLUE             = "\033[34m"  # light/dark mode: #0451A5 / #3B8EEA
+    MAGENTA          = "\033[356m" # light/dark mode: #BC05BC / #D670D6
+    CYAN             = "\033[36m"  # light/dark mode: #0598BC / #29B8DB
+    LIGHT_GRAY       = "\033[37m"  # light/dark mode: #A5A5A5 / #E5E5E5
 
-    # LIGHT_GRAY       = ansi_code(37)
-    # DARK_GRAY        = ansi_code(90)
-    # LIGHT_RED        = ansi_code(91)
-    # LIGHT_GREEN      = ansi_code(92)
-    # LIGHT_YELLOW     = ansi_code(93)
-    # LIGHT_BLUE       = ansi_code(94)
-    # LIGHT_MAGENTA    = ansi_code(95)
-    # LIGHT_CYAN       = ansi_code(96)
-    # WHITE            = ansi_code(97)
+    BLACK_BG         = "\033[40m"
+    RED_BG           = "\033[41m"
+    GREEN_BG         = "\033[42m"
+    YELLOW_BG        = "\033[43m"
+    BLUE_BG          = "\033[44m"
+    MAGENTA_BG       = "\033[45m"
+    CYAN_BG          = "\033[46m"
+    LIGHT_GRAY_BG    = "\033[47m"
 
-    BLACK_BG         = ansi_code(40)
-    RED_BG           = ansi_code(41)
-    GREEN_BG         = ansi_code(42)
-    YELLOW_BG        = ansi_code(43)
-    BLUE_BG          = ansi_code(44)
-    MAGENTA_BG       = ansi_code(45)
-    CYAN_BG          = ansi_code(46)
-    LIGHT_GRAY_BG    = ansi_code(47)
+    # DARK_GRAY        = "\033[90m"
+    # LIGHT_RED        = "\033[91m"
+    # LIGHT_GREEN      = "\033[92m"
+    # LIGHT_YELLOW     = "\033[93m"
+    # LIGHT_BLUE       = "\033[94m"
+    # LIGHT_MAGENTA    = "\033[95m"
+    # LIGHT_CYAN       = "\033[96m"
+    # WHITE            = "\033[97m"
 
-    # DARK_GRAY_BG     = ansi_code(100)
-    # LIGHT_RED_BG     = ansi_code(101)
-    # LIGHT_GREEN_BG   = ansi_code(102)
-    # LIGHT_YELLOW_BG  = ansi_code(103)
-    # LIGHT_BLUE_BG    = ansi_code(104)
-    # LIGHT_MAGENTA_BG = ansi_code(105)
-    # LIGHT_CYAN_BG    = ansi_code(106)
-    # WHITE_BG         = ansi_code(107)
+    # DARK_GRAY_BG     = "\033[100m"
+    # LIGHT_RED_BG     = "\033[101m"
+    # LIGHT_GREEN_BG   = "\033[102m"
+    # LIGHT_YELLOW_BG  = "\033[103m"
+    # LIGHT_BLUE_BG    = "\033[104m"
+    # LIGHT_MAGENTA_BG = "\033[105m"
+    # LIGHT_CYAN_BG    = "\033[106m"
+    # WHITE_BG         = "\033[107m"
 
     @staticmethod
     def clear(text: str) -> str:
         return re.sub(r"\033\[[0-9;]*m", "", text)
 
-
-pattern = {
+pattern: Dict[str, str] = {
     "time":      " --> ",
     "action":    " >>> ",
     "result":    " ==> ",
@@ -131,16 +121,16 @@ pattern = {
     "debug":     "DEBUG", # only in debug mode
     "wait":      "WAIT ", # only in debug mode
 
-    "clear":     " ••• ", # only internal (for decorator, ...)
+    "clear":     " ooo ", # only internal (for decorator, ...)
 }
 
 class Trace:
-    BASE_PATH = Path(sys.argv[0]).parent
+    BASE_PATH: Path = Path(sys.argv[0]).parent
 
-    default_base = BASE_PATH.resolve()
-    default_base_folder = str(default_base).replace("\\", "/")
+    default_base: Path = BASE_PATH.resolve()
+    default_base_folder: str = str(default_base).replace("\\", "/")
 
-    settings: Dict[str, Any] = {
+    settings: ClassVar[Dict[str, Any]] = {
         "appl_folder":    default_base_folder + "/",
 
         "color":          True,
@@ -153,9 +143,9 @@ class Trace:
         "show_caller":    True,
     }
 
-    pattern: List[str] = []
-    messages: List[str] = []
-    csv: bool     = False
+    pattern:  ClassVar[List[str]] = []
+    messages: ClassVar[List[str]] = []
+    csv: bool = False
     output: Callable[..., None] | None = None
 
     @classmethod
@@ -169,7 +159,7 @@ class Trace:
                     # tzdata installed ?
 
                     if importlib.util.find_spec("tzdata") is None:
-                        print( f"{pattern["warning"]} install 'tzdata' for named timezones")
+                        print( f"{pattern['warning']} install 'tzdata' for named timezones")  # noqa: T201
                         cls.settings[key] = True
                     else:
 
@@ -178,7 +168,7 @@ class Trace:
                         try:
                             _ = ZoneInfo(value)
                         except ZoneInfoNotFoundError:
-                            print( f"{pattern['error']} tzdata '{value}' unknown timezone")
+                            print( f"{pattern['error']} tzdata '{value}' unknown timezone")  # noqa: T201
                             cls.settings[key] = True
 
             else:
@@ -209,9 +199,9 @@ class Trace:
 
         try:
             if not trace_path.is_dir():
-                os.makedirs(path)
+                Path(path).mkdir(parents=True)
 
-            with open(Path(trace_path, f"{filename} • {curr_time}.txt"), "w", encoding="utf-8") as file:
+            with Path.open(Path(trace_path, f"{filename} • {curr_time}.txt"), mode="w", encoding="utf-8", newline="\n") as file:
                 file.write(text)
 
         except OSError as err:
@@ -303,27 +293,31 @@ class Trace:
             pre = f"{cls.__get_time()}{cls.__get_pattern()}{cls.__get_caller()}"
             cls.__show_message(cls.__check_file_output(), pre, message, *optional)
             try:
-                print(f"{Color.RED}{Color.BOLD} >>> Press Any key to continue or ESC to exit <<< {Color.RESET}", end="", flush=True)
+                print(f"{Color.RED}{Color.BOLD} >>> Press Any key to continue or ESC to exit <<< {Color.RESET}", end="", flush=True)  # noqa: T201
 
-                if system == "Windows":
-                    key = msvcrt.getch()                   # type: ignore[reportPossiblyUnboundVariable]
-                    print()
-                else:
+                if platform.system() == "Windows":
+                    import msvcrt
 
-                    # unix terminal
+                    key = msvcrt.getch()                      # type: ignore[attr-defined] # -> Linux
+                    print()  # noqa: T201
+
+                else: # unix terminal
+
+                    import termios
+                    import tty
 
                     fd: int = sys.stdin.fileno()
-                    old_settings: Any = term.tcgetattr(fd) # type: ignore[attr-defined]
+                    old_settings: Any = termios.tcgetattr(fd)  # type: ignore[attr-defined] # -> Windows
                     try:
-                        tty.setraw(sys.stdin.fileno())     # type: ignore[attr-defined]
+                        tty.setraw(sys.stdin.fileno())         # type: ignore[attr-defined] # -> Windows
                         key = sys.stdin.buffer.read(1)
                     finally:
-                        term.tcsetattr(                    # type: ignore[attr-defined]
+                        termios.tcsetattr(                     # type: ignore[attr-defined] # -> Windows
                             fd,
-                            term.TCSADRAIN,                # type: ignore[attr-defined]
-                            old_settings
+                            termios.TCSADRAIN,                 # type: ignore[attr-defined] # -> Windows
+                            old_settings,
                         )
-                        print()
+                        print()  # noqa: T201
 
                 if key == b"\x1b":
                     sys.exit()
@@ -334,11 +328,11 @@ class Trace:
 
     @classmethod
     def __check_file_output(cls) -> bool:
-        current_frame = inspect.currentframe()
+        current_frame: FrameType | None = inspect.currentframe()
         if current_frame is None:
             return False
 
-        caller_frame = current_frame.f_back
+        caller_frame: FrameType | None = current_frame.f_back
         if caller_frame is None:
             return False
 
@@ -348,13 +342,13 @@ class Trace:
     @classmethod
     def __get_time_timezone(cls, tz: bool | str) -> str:
         if tz is False:
-            return datetime.now().strftime("%H:%M:%S.%f")[:-3]
+            return datetime.now().astimezone().strftime("%H:%M:%S.%f")[:-3]
 
         elif tz is True:
             d = datetime.now().astimezone()
             return d.strftime("%H:%M:%S.%f")[:-3] + d.strftime("%z")
 
-        else:
+        else: # str
             try:
                 timezone = ZoneInfo(tz)
                 d = datetime.now().astimezone(timezone)
@@ -376,11 +370,11 @@ class Trace:
 
     @staticmethod
     def __get_pattern() -> str:
-        current_frame = inspect.currentframe()
+        current_frame: FrameType | None = inspect.currentframe()
         if current_frame is None:
             return pattern["clear"]
 
-        caller_frame = current_frame.f_back
+        caller_frame: FrameType | None = current_frame.f_back
         if caller_frame is None:
             return pattern["clear"]
 
@@ -398,24 +392,21 @@ class Trace:
         path = inspect.stack()[2][1].replace("\\", "/")
         path = path.split(cls.settings["appl_folder"])[-1]
 
-        current_frame = inspect.currentframe()
+        current_frame: FrameType | None = inspect.currentframe()
         if current_frame is None:
             return ""
 
-        caller_frame = current_frame.f_back
+        caller_frame: FrameType | None = current_frame.f_back
         if caller_frame is None:
             return ""
 
-        trace_frame = caller_frame.f_back
+        trace_frame: FrameType | None = caller_frame.f_back
         if trace_frame is None:
             return ""
 
         line_no = str(trace_frame.f_lineno).zfill(3)
 
-        # line_no = str(inspect.currentframe().f_back.f_back.f_lineno).zfill(3)
-        # caller = inspect.currentframe().f_back.f_back.f_code.co_qualname
-
-        caller = trace_frame.f_code.co_qualname # .co_qualname (3.11 or newer)
+        caller = trace_frame.f_code.co_qualname
         caller = caller.replace(".<locals>.", " → ")
 
         if caller == "<module>":
@@ -454,15 +445,15 @@ class Trace:
         def is_redirected(stream: Any) -> bool:
             return not hasattr(stream, "isatty") or not stream.isatty()
 
-        if not cls.settings["color"] or is_redirected(sys.stdout):
+        if not cls.settings["color"] or is_redirected(stream=sys.stdout):
             text_no_tabs = Color.clear(text_no_tabs)
 
         # https://docs.python.org/3/library/sys.html#sys.displayhook
 
-        bytes = (text_no_tabs + "\n").encode("utf-8", "backslashreplace")
+        data = (text_no_tabs + "\n").encode("utf-8", "backslashreplace")
         if hasattr(sys.stdout, "buffer"):
-            sys.stdout.buffer.write(bytes)
+            sys.stdout.buffer.write(data)
             sys.stdout.flush()
         else:
-            text = bytes.decode("utf-8", "strict")
+            text = data.decode("utf-8", "strict")
             sys.stdout.write(text)

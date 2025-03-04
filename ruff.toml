@@ -1,3 +1,96 @@
+exclude = [
+    ".git",
+    ".git-rewrite",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+]
+
+line-length = 150
+
 [lint]
-select = ["E4", "E7", "E9", "F", "Q", "N"]
-ignore = ["N802"]
+select = ["ALL"]
+ignore = [
+    "C90",     # mccabe
+    "D",       # pydocstyle
+    "ERA",     # eradicate
+    "FBT",     # flake8-boolean-trap
+    "FIX",     # flake8-fixme
+    "T20",     # flake8-print
+    "TD",      # flake8-todos
+
+    # flake8-builtins
+    "A001",    # builtin-variable-shadowing
+    "A002",    # builtin-argument-shadowing
+    "A005",    # stdlib-module-shadowing
+
+    # flake8-annotations
+    "ANN401",  # any-type
+
+    # flake8-unused-arguments
+    "ARG001",  # unused-function-argument
+
+    # pycodestyle Error
+    "E501",    # line too long
+
+    # Perflint
+    "PERF203", # try-except-in-loop
+    "PERF401", # manual-list-comprehension
+
+    # Refactor
+    "PLR0911", # too-many-return-statements
+    "PLR0912", # too-many-branches
+    "PLR0913", # too-many-arguments
+    "PLR0915", # too-many-statements
+    "PLR2004", # magic-value-comparison
+
+    "PLW0603", # global-statement
+
+    # flake8-return
+    "RET504",  # unnecessary-assign
+    "RET505",  # superfluous-else-return
+
+    # Ruff
+    "RUF001",  # ambiguous-unicode-character-string
+    "RUF003",  # ambiguous-unicode-character-comment
+    "RUF100",  # unused-noqa
+
+    # flake8-bandit
+    "S311",    # suspicious-non-cryptographic-random-usage
+    "S324",    # hashlib-insecure-hash-function
+    "S603",    # subprocess-without-shell-equals-true
+
+    # flake8-simplify
+    "SIM102",  # collapsible-if
+    "SIM103",  # needless-bool
+    "SIM105",  # suppressible-exception
+    "SIM108",  # if-else-block-instead-of-if-exp
+    "SIM110",  # reimplemented-builtin
+
+    # tryceratops
+    "TRY002",  # raise-vanilla-class
+    "TRY300",  # try-consider-else
+
+    # pyupgrade
+    "UP006",   # non-pep585-annotation
+    "UP035",   # deprecated-import
+]
+
+[per-file-ignores]
+"tests/*" = [
+    # flake8-bandit
+    "S101",    # assert
+
+    # flake8-pytest-style
+    "PT012",   # pytest-raises-with-multiple-statements
+]
+
+[lint.isort]
+lines-between-types = 1
+lines-after-imports = 1
